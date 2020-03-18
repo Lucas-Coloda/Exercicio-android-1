@@ -4,7 +4,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.TextView;
 
 import com.android.volley.Request;
@@ -13,11 +12,13 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -37,19 +38,29 @@ public class MainActivity extends AppCompatActivity {
     private static final String URI_AND = "&";
 
     // View objects
-    private TextView textView;
-    private List<String> names;
+    private TextView maiotPgt;
+    private TextView menorPgt;
+    private TextView totalPago;
+    private TextView mediaBeneficiados;
 
     // Other vars
-    private static final int MONTH_IN_MILISECONDS = 30 * 24 * 60 * 60 * 1000 * -1;
+    private ArrayList<JSONObject> data;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        textView = findViewById(R.id.textName);
 
-        names = new ArrayList<>();
+        this.data = new ArrayList<JSONObject>();
+
+        // View Objects
+        maiotPgt = findViewById(R.id.maiorPgt);
+        menorPgt = findViewById(R.id.menorPgt);
+        totalPago = findViewById(R.id.totalPago);
+        mediaBeneficiados = findViewById(R.id.mediaBeneficiados);
+
+        // Get API data
+        carregarDados();
     }
 
     private void carregarDados() {
@@ -69,7 +80,6 @@ public class MainActivity extends AppCompatActivity {
             url += URI_INITIALIATOR + PARAM_CODIGO_MUNICIPIO + URI_EQUALS_TO + CODIGO_PR_CURITIBA;
             url += URI_AND + PARAM_MES_ANO + URI_EQUALS_TO + year + month;
             url += URI_AND + PARAM_PAGINA + URI_EQUALS_TO + 1;
-            Log.i("INFO", url);
             generateRequest(url);
         }
 
@@ -78,11 +88,13 @@ public class MainActivity extends AppCompatActivity {
 
     // View suport methods
     private void showData() {
-        Log.i("INFO", "oi");
-    }
-
-    public void btnCarregarEvent(View v) {
-        carregarDados();
+        try {
+            // Metodo syncrono do volley nao se adaptou ao resultado da busca na API
+            TimeUnit.SECONDS.sleep(15);
+            Log.i("ii", this.data.size()+"");
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     // Services
@@ -95,7 +107,24 @@ public class MainActivity extends AppCompatActivity {
         return new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
-                Log.i("INFO", response.toString());
+                if (response.length() > 0) {
+                    try {
+                        JSONObject res = response.getJSONObject(0);
+
+                        JSONObject dado = new JSONObject();
+                        dado.put("data", res.getString("dataReferencia"));
+                        dado.put("valor", res.getString("valor"));
+                        dado.put("beneficiados", res.getString("quantidadeBeneficiados"));
+
+                        Log.i("dado", response.toString());
+                        Log.i("dado", res.toString());
+                        data.add(dado);
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    Log.i("INFO", response.toString());
+                }
             }
         };
     }
