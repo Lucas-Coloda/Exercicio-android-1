@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
 
             String url = ENDPOINT + BOLSA_FAMILIA_MUNICIPIO;
             url += URI_INITIALIATOR + PARAM_CODIGO_MUNICIPIO + URI_EQUALS_TO + CODIGO_PR_CURITIBA;
-            url += URI_AND + PARAM_MES_ANO + URI_EQUALS_TO + year + month ;
+            url += URI_AND + PARAM_MES_ANO + URI_EQUALS_TO + year + month;
             url += URI_AND + PARAM_PAGINA + URI_EQUALS_TO + 1;
             Log.i("INFO", url);
             generateRequest(url);
